@@ -13,7 +13,7 @@ class XposedEntryPoint : IXposedHookLoadPackage {
 
     private val mainConfig = HookConfig.Builder()
         .addSupportApplication("com.genlz.jetpacks.debug")
-        .addSupportApplication("com.google.android.youtube")
+        .addSupportApplication("android")
         .build()
 
     /**
