@@ -2,6 +2,7 @@ package com.genlz.xposeddemo.hooks
 
 import android.view.View
 import android.widget.Toast
+import com.genlz.xposeddemo.HookConfig
 import com.genlz.xposeddemo.Hooker
 import com.genlz.xposeddemo.spi.HookerProvider
 import com.genlz.xposeddemo.util.getApplicationContext
@@ -15,9 +16,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-class HookNothing private constructor() : Hooker {
+class HookNothing private constructor(
+    config: HookConfig
+) : Hooker(config) {
 
-    override suspend fun hook(lpparam: XC_LoadPackage.LoadPackageParam) {
+    override suspend fun hook(lpParam: XC_LoadPackage.LoadPackageParam) {
         val applicationContext = getApplicationContext()
         val id = applicationContext.resources.getIdentifier(
             "content_thumbnail",
@@ -30,8 +33,7 @@ class HookNothing private constructor() : Hooker {
                 "setOnClickListener",
                 View.OnClickListener::class.java
             ).hook {
-                if ((thisObject as View).id == id)
-                    xlog(thisObject)
+
             }
         }
         Toast.makeText(applicationContext, "666", Toast.LENGTH_SHORT).show()
@@ -41,7 +43,7 @@ class HookNothing private constructor() : Hooker {
 
     class Provider : HookerProvider<HookNothing> {
         override fun provideHooker(): HookNothing {
-            return HookNothing()
+            return HookNothing(HookConfig.Builder().build())
         }
     }
 }
