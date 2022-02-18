@@ -38,7 +38,7 @@ android {
 
 dependencies {
 
-    val HILT = "2.40.3"
+    val HILT = "2.40.5"
     implementation("com.google.dagger:hilt-android:$HILT")
     kapt("com.google.dagger:hilt-android-compiler:$HILT")
 
