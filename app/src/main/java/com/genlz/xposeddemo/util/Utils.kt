@@ -2,13 +2,19 @@ package com.genlz.xposeddemo.util
 
 import android.app.Application
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.lang.reflect.Method
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.reflect.KClass
@@ -86,9 +92,45 @@ suspend fun Method.hook(
         XposedBridge.hookMethod(this@hook, callback)
         awaitClose()
     }.collect {
-        if (it.status == StatefulMethodHookParam.STATUS_BEFORE)
-            beforeHook(it.base)
-        if (it.status == StatefulMethodHookParam.STATUS_AFTER)
-            afterHook(it.base)
+        when (it.status) {
+            StatefulMethodHookParam.STATUS_BEFORE -> beforeHook(it.base)
+
+            StatefulMethodHookParam.STATUS_AFTER -> afterHook(it.base)
+        }
     }
 }
+
+/**
+ * A simple wrapper for [XC_MethodHook.MethodHookParam],it indicates [status] additionally,
+ * before or after.
+ */
+internal data class StatefulMethodHookParam(
+    val base: XC_MethodHook.MethodHookParam,
+    val status: Int
+) {
+    companion object {
+        const val STATUS_BEFORE = 0
+        const val STATUS_AFTER = 1
+    }
+}
+
+private val availableProcessors = Runtime.getRuntime().availableProcessors()
+
+internal val xposedDispatcherInternal = ThreadPoolExecutor(
+    availableProcessors,       // Initial pool size
+    availableProcessors,       // Max pool size
+    1L,
+    TimeUnit.SECONDS,
+    LinkedBlockingQueue(),
+    object : ThreadFactory {
+        var i = 0
+        override fun newThread(it: Runnable) =
+            Thread(it).apply { name = "plugin-pool-thread-${i++}" }
+    }
+) { r, _ ->
+    Handler(Looper.getMainLooper()).post(r)//Run on main thread.
+}.asCoroutineDispatcher()
+
+
+@Suppress("unused")
+val Dispatchers.xposedDispatcher: CoroutineDispatcher get() = xposedDispatcherInternal

@@ -29,6 +29,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 
     packagingOptions {
@@ -43,6 +45,8 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:$HILT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+
     compileOnly("de.robv.android.xposed:api:82")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
