@@ -15,8 +15,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.reflect.KClass
 
 /**
@@ -27,11 +25,9 @@ fun xlog(t: Throwable) = XposedBridge.log(t)
 /**
  * Wrapper for [XposedBridge.log]
  */
-fun xlog(msg: String? = null) = XposedBridge.log(msg)
-
 fun xlogln(any: Any? = null) = XposedBridge.log("${any ?: ""}\n")
 
-fun xlog(any: Any? = null) = XposedBridge.log("${any ?: ""}")
+fun xlog(any: Any? = null) = XposedBridge.log("${any ?: "null"}")
 
 /**
  * Return the class loadedBy by specified class loader.
@@ -44,6 +40,7 @@ fun <T : Any> KClass<out T>.loadedBy(
 /**
  * Retrieve application context by hooking [Application.onCreate]
  */
+@OptIn(InternalCoroutinesApi::class)
 suspend fun getApplicationContext(): Context = suspendCancellableCoroutine {
     XposedHelpers.findAndHookMethod(
         Application::class.java,
@@ -52,9 +49,13 @@ suspend fun getApplicationContext(): Context = suspendCancellableCoroutine {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 try {
                     val context = param.thisObject as Context
-                    it.resume(context)
+                    it.tryResume(context)?.let { token ->
+                        it.completeResume(token)
+                    }
                 } catch (t: Throwable) {
-                    it.resumeWithException(t)
+                    it.tryResumeWithException(t)?.let { token ->
+                        it.completeResume(token)
+                    }
                 }
             }
         })
@@ -133,4 +134,5 @@ internal val xposedDispatcherInternal = ThreadPoolExecutor(
 
 
 @Suppress("unused")
-val Dispatchers.xposedDispatcher: CoroutineDispatcher get() = xposedDispatcherInternal
+val Dispatchers.xposedDispatcher: CoroutineDispatcher
+    get() = xposedDispatcherInternal
