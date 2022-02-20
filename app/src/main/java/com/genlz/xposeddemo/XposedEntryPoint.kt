@@ -1,7 +1,5 @@
 package com.genlz.xposeddemo
 
-import android.os.Handler
-import android.os.Looper
 import com.genlz.xposeddemo.spi.HookerProvider
 import com.genlz.xposeddemo.util.xlog
 import com.genlz.xposeddemo.util.xposedDispatcher
@@ -12,19 +10,17 @@ import de.robv.android.xposed.callbacks.XC_InitPackageResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import kotlinx.coroutines.*
 import java.util.*
-import java.util.concurrent.Executor
 
 class XposedEntryPoint :
     IXposedHookLoadPackage,
     IXposedHookInitPackageResources,
     IXposedHookZygoteInit {
 
-    private val uncaughtExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        xlog(throwable)
-    }
-
-    private val xposedScope =
-        CoroutineScope(Dispatchers.xposedDispatcher + SupervisorJob() + uncaughtExceptionHandler)
+    private val xposedScope = CoroutineScope(
+        Dispatchers.xposedDispatcher
+                + SupervisorJob()
+                + CoroutineExceptionHandler { _, t -> xlog(t) }
+    )
 
     private val hooks = ServiceLoader.load(
         HookerProvider::class.java,
@@ -44,7 +40,6 @@ class XposedEntryPoint :
 //        if (Thread.currentThread().name != INTERCEPTOR_THREAD || handleLoadPackageInvoked) return
 //        handleLoadPackageInvoked = true
         //
-
         xposedScope.launch { hooks.forEach { it.onLoadPackage(lpparam) } }
     }
 
@@ -69,6 +64,7 @@ class XposedEntryPoint :
 
     companion object {
         private const val INTERCEPTOR_THREAD = "Binder:interceptor"
+        private const val TAG = "LSP"
     }
 }
 

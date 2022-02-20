@@ -15,6 +15,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("int", "MIN_SDK", "$minSdk")
+        buildConfigField("int", "TARGET_SDK", "$targetSdk")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
