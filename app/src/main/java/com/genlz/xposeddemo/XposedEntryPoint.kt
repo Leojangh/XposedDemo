@@ -1,31 +1,38 @@
 package com.genlz.xposeddemo
 
-import com.genlz.xposeddemo.spi.HookerProvider
-import com.genlz.xposeddemo.util.xlog
-import com.genlz.xposeddemo.util.xposedDispatcher
+import com.genlz.xposeddemo.di.CoroutinesModule
+import com.genlz.xposeddemo.di.XposedInjector
+import dagger.Component
 import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_InitPackageResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Singleton
 
-class XposedEntryPoint :
-    IXposedHookLoadPackage,
-    IXposedHookInitPackageResources,
-    IXposedHookZygoteInit {
+/**
+ * System classloader:dalvik.system.PathClassLoader
+ */
+class XposedEntryPoint : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
 
-    private val xposedScope = CoroutineScope(
-        Dispatchers.xposedDispatcher
-                + SupervisorJob()
-                + CoroutineExceptionHandler { _, t -> xlog(t) }
-    )
+    private val xposedScope = DaggerXposedEntryPoint_Scope.create().xposedScope()
 
-    private val hooks = ServiceLoader.load(
-        HookerProvider::class.java,
-        javaClass.classLoader/*xposed plugin classloader*/
-    ).map { it.provideHooker() }
+    @Singleton
+    @Component(modules = [CoroutinesModule::class])
+    interface Scope {
+        fun xposedScope(): CoroutineScope
+    }
+
+    @Singleton
+    @Component(modules = [XposedInjector::class])
+    interface Hooks {
+        fun hooks(): Set<Hooker>
+    }
+
+    private val hooks = DaggerXposedEntryPoint_Hooks.create().hooks()
 
     @Volatile
     private var handleLoadPackageInvoked = false //Maybe wrong

@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("dagger.hilt.android.plugin")
+//    id("dagger.hilt.android.plugin")
     kotlin("kapt")
 }
 
@@ -43,9 +43,11 @@ android {
 
 dependencies {
 
-    val HILT = "2.40.5"
-    implementation("com.google.dagger:hilt-android:$HILT")
-    kapt("com.google.dagger:hilt-android-compiler:$HILT")
+    val dagger: String by project
+//    implementation("com.google.dagger:hilt-android:$dagger")
+//    kapt("com.google.dagger:hilt-android-compiler:$dagger")
+    implementation("com.google.dagger:dagger:$dagger")
+    kapt("com.google.dagger:dagger-compiler:$dagger")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")

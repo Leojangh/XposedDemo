@@ -3,7 +3,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter()
+        maven("https://jcenter.bintray.com")
     }
 }
 rootProject.name = "XposedDemo"

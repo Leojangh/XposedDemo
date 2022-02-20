@@ -25,7 +25,7 @@ fun xlog(t: Throwable) = XposedBridge.log(t)
 /**
  * Wrapper for [XposedBridge.log]
  */
-fun xlogln(any: Any? = null) = XposedBridge.log("${any ?: ""}\n")
+fun xlogln(any: Any? = null) = XposedBridge.log("${any ?: "null"}\n")
 
 fun xlog(any: Any? = null) = XposedBridge.log("${any ?: "null"}")
 
@@ -39,6 +39,9 @@ fun <T : Any> KClass<out T>.loadedBy(
 
 /**
  * Retrieve application context by hooking [Application.onCreate]
+ * It will return android context if the invocation appears in [com.genlz.xposeddemo.Hooker.onInitZygote].
+ *
+ * Android context is <b>NOT</b> system context.
  */
 @OptIn(InternalCoroutinesApi::class)
 suspend fun getApplicationContext(): Context = suspendCancellableCoroutine {
@@ -114,25 +117,3 @@ internal data class StatefulMethodHookParam(
         const val STATUS_AFTER = 1
     }
 }
-
-private val availableProcessors = Runtime.getRuntime().availableProcessors()
-
-internal val xposedDispatcherInternal = ThreadPoolExecutor(
-    availableProcessors,       // Initial pool size
-    availableProcessors,       // Max pool size
-    1L,
-    TimeUnit.SECONDS,
-    LinkedBlockingQueue(),
-    object : ThreadFactory {
-        var i = 0
-        override fun newThread(it: Runnable) =
-            Thread(it).apply { name = "plugin-pool-thread-${i++}" }
-    }
-) { r, _ ->
-    Handler(Looper.getMainLooper()).post(r)//Run on main thread.
-}.asCoroutineDispatcher()
-
-
-@Suppress("unused")
-val Dispatchers.xposedDispatcher: CoroutineDispatcher
-    get() = xposedDispatcherInternal
