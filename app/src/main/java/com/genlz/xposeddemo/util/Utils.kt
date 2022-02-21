@@ -2,8 +2,6 @@ package com.genlz.xposeddemo.util
 
 import android.app.Application
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
@@ -11,10 +9,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import java.lang.reflect.Method
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 /**
@@ -39,7 +33,7 @@ fun <T : Any> KClass<out T>.loadedBy(
 
 /**
  * Retrieve application context by hooking [Application.onCreate]
- * It will return android context if the invocation appears in [com.genlz.xposeddemo.Hooker.onInitZygote].
+ * It will return android context if the invocation appears in [com.genlz.xposeddemo.Hook.onInitZygote].
  *
  * Android context is <b>NOT</b> system context.
  */

@@ -8,11 +8,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LocationHook @Inject constructor(config: HookConfig) : Hook(config) {
+class PackageManagerHook @Inject constructor(config: HookConfig) : Hook(config) {
 
     override suspend fun onLoadPackage(lpParam: XC_LoadPackage.LoadPackageParam) {
-//        if (lpParam.packageName !in config.getSupportApplications()) return
-//        if (Build.VERSION.SDK_INT !in config.getSupportSdkVersions()) return
-        xlog(666)
+        xlog(777)
     }
 }

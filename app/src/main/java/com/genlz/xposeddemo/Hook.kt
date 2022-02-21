@@ -11,7 +11,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
 import java.util.concurrent.Executor
 
-abstract class Hooker(val config: HookConfig) {
+abstract class Hook(val config: HookConfig) {
 
     //Wait to main looper initialized.
     private val handler by lazy { Handler(Looper.getMainLooper()) }
