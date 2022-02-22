@@ -5,10 +5,12 @@ import com.genlz.xposeddemo.hooks.LocationHook
 import com.genlz.xposeddemo.hooks.PackageManagerHook
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.migration.DisableInstallInCheck
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
 @Module
+@DisableInstallInCheck
 interface HookModule {
 
     @Binds
