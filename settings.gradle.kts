@@ -6,5 +6,14 @@ dependencyResolutionManagement {
         maven("https://jcenter.bintray.com")
     }
 }
+pluginManagement {
+
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 rootProject.name = "XposedDemo"
 include(":app")

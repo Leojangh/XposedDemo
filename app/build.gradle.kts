@@ -1,22 +1,18 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-//    id("dagger.hilt.android.plugin")
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
-    compileSdk = 31
-
+    compileSdk = 34
+    namespace = "com.genlz.xposeddemo"
     defaultConfig {
         applicationId = "com.genlz.xposeddemo"
-        minSdk = 27
-        targetSdk = 31
+        minSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
-        buildConfigField("int", "MIN_SDK", "$minSdk")
-        buildConfigField("int", "TARGET_SDK", "$targetSdk")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -27,16 +23,16 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
 
         freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 
-    packagingOptions {
+    packaging {
         resources.excludes += "DebugProbesKt.bin"
     }
 }
@@ -47,15 +43,16 @@ dependencies {
 //    implementation("com.google.dagger:hilt-android:$dagger")
 //    kapt("com.google.dagger:hilt-android-compiler:$dagger")
     implementation("com.google.dagger:dagger:$dagger")
-    kapt("com.google.dagger:dagger-compiler:$dagger")
+    ksp("com.google.dagger:dagger-compiler:$dagger")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+    implementation("org.smali:dexlib2:2.5.2")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     compileOnly("de.robv.android.xposed:api:82")
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("androidx.core:core-ktx:1.12.0")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }

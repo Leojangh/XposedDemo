@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.genlz.xposeddemo.util
 
 import android.app.Application
@@ -14,20 +16,21 @@ import kotlin.reflect.KClass
 /**
  * Wrapper for [XposedBridge.log]
  */
-fun xlog(t: Throwable) = XposedBridge.log(t)
+inline fun xlog(t: Throwable) = XposedBridge.log(t)
 
 /**
  * Wrapper for [XposedBridge.log]
  */
-fun xlogln(any: Any? = null) = XposedBridge.log("${any ?: "null"}\n")
+inline fun xlogln(any: Any?) = XposedBridge.log("${any ?: "null"}\n")
+inline fun xlogln() = XposedBridge.log("\n")
 
-fun xlog(any: Any? = null) = XposedBridge.log("${any ?: "null"}")
+inline fun xlog(any: Any?) = XposedBridge.log("${any ?: "null"}")
 
 /**
  * Return the class loadedBy by specified class loader.
  */
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> KClass<out T>.loadedBy(
+inline fun <T : Any> KClass<out T>.loadedBy(
     classLoader: ClassLoader
 ) = classLoader.loadClass(qualifiedName) as Class<T>
 

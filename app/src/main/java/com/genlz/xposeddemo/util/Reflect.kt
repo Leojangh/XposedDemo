@@ -6,7 +6,9 @@ import java.lang.reflect.Modifier
 fun printClass(clazz: Class<*>) {
     val superclass = clazz.superclass
     val modifiers = Modifier.toString(clazz.modifiers)
-    if (modifiers.isNotEmpty()) xlog("$modifiers class ${clazz.canonicalName} extends ${superclass?.canonicalName} {")
+    val interfaces = clazz.interfaces
+    val i = if (interfaces.isNullOrEmpty()) "" else "implements ${interfaces.joinToString()}"
+    if (modifiers.isNotEmpty()) xlog("$modifiers class ${clazz.canonicalName} extends ${superclass?.canonicalName} $i {")
     printFields(clazz)
     xlogln()
     printConstructors(clazz)

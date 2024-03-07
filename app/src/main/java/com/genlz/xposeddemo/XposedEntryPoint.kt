@@ -1,6 +1,6 @@
 package com.genlz.xposeddemo
 
-import com.genlz.xposeddemo.di.ConfigModule
+import android.os.Build
 import com.genlz.xposeddemo.di.CoroutinesModule
 import com.genlz.xposeddemo.di.HookModule
 import dagger.Component
@@ -17,7 +17,14 @@ import javax.inject.Singleton
 /**
  * System classloader:dalvik.system.PathClassLoader
  */
-class XposedEntryPoint : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
+class XposedEntryPoint : IXposedHookLoadPackage,
+    IXposedHookInitPackageResources,
+    IXposedHookZygoteInit {
+
+    companion object {
+        @JvmStatic
+        private val API = Build.VERSION.SDK_INT
+    }
 
     private val xposedScope = DaggerXposedEntryPoint_Scope.create().xposedScope()
 
@@ -28,16 +35,25 @@ class XposedEntryPoint : IXposedHookLoadPackage, IXposedHookInitPackageResources
     }
 
     @Singleton
-    @Component(modules = [ConfigModule::class, HookModule::class])
+    @Component(modules = [HookModule::class])
     interface HookComponent {
-        fun hooks(): Map<Class<*>, Hook>
+        fun hooks(): Set<@JvmSuppressWildcards Hook>
     }
 
     private val hooks = DaggerXposedEntryPoint_HookComponent.create().hooks()
 
     @Throws(Throwable::class)
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        xposedScope.launch { hooks.values.forEach { it.onLoadPackage(lpparam) } }
+        xposedScope.launch {
+            hooks.forEach {
+                if (it is SuspendableIXposedHookLoadPackage
+                    && lpparam.packageName in it.config.supportedPackages
+                    && API in it.config.supportSdkVersions
+                ) {
+                    it.handleLoadPackage(lpparam)
+                }
+            }
+        }
     }
 
     /**
@@ -46,14 +62,35 @@ class XposedEntryPoint : IXposedHookLoadPackage, IXposedHookInitPackageResources
      */
     @Throws(Throwable::class)
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
-        xposedScope.launch { hooks.values.forEach { it.onInitZygote(startupParam) } }
+        xposedScope.launch {
+            hooks.forEach {
+                if (it is SuspendableIXposedHookZygoteInit
+                    && API in it.config.supportSdkVersions
+                ) {
+                    it.initZygote(startupParam)
+                }
+            }
+        }
     }
 
     @Throws(Throwable::class)
     override fun handleInitPackageResources(
         resparam: XC_InitPackageResources.InitPackageResourcesParam
     ) {
-        xposedScope.launch { hooks.values.forEach { it.onInitPackageRes(resparam) } }
+        xposedScope.launch {
+            hooks.forEach {
+                if (it is SuspendableIXposedHookInitPackageResources
+                    && resparam.packageName in it.config.supportedPackages
+                    && API in it.config.supportSdkVersions
+                ) {
+                    it.handleInitPackageResources(resparam)
+                }
+            }
+        }
+        //lsp classloader
+//        val classLoader = javaClass.classLoader!!
+//        xlog("system classloader:${ClassLoader.getSystemClassLoader()}")
+//        xlog("Lsp classloader:${classLoader}")
     }
 }
 
