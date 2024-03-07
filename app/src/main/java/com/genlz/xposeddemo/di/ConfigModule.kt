@@ -5,11 +5,9 @@ import com.genlz.xposeddemo.HookConfig
 import com.genlz.xposeddemo.hooks.LocationHook
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.migration.DisableInstallInCheck
 import javax.inject.Singleton
 
 @Module
-@DisableInstallInCheck
 object ConfigModule {
 
     /**

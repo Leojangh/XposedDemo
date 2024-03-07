@@ -6,13 +6,11 @@ import android.util.Log
 import com.genlz.xposeddemo.util.xlog
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.migration.DisableInstallInCheck
 import kotlinx.coroutines.*
 import java.util.concurrent.*
 import javax.inject.Singleton
 
 @Module
-@DisableInstallInCheck
 object CoroutinesModule {
 
     @Singleton
